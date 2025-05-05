@@ -1,12 +1,13 @@
 import { observer } from "mobx-react-lite"
 import { FC } from "react"
-import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
+import { Image, ImageStyle, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import { Text, Screen } from "@/components"
 import { isRTL } from "@/i18n"
 import { AppStackScreenProps } from "../navigators"
 import { $styles, type ThemedStyle } from "@/theme"
 import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
 import { useAppTheme } from "@/utils/useAppTheme"
+import { useStores } from "@/models"
 
 const welcomeLogo = require("../../assets/images/logo.png")
 const welcomeFace = require("../../assets/images/welcome-face.png")
@@ -15,30 +16,21 @@ interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
 
 export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeScreen() {
   const { themed, theme } = useAppTheme()
+  const { authStore } = useStores()
 
   const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
-
+  const handleLogout = () => {
+    authStore.logout()
+  }
   return (
-    <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-      <View style={themed($topContainer)}>
-        <Image style={themed($welcomeLogo)} source={welcomeLogo} resizeMode="contain" />
-        <Text
-          testID="welcome-heading"
-          style={themed($welcomeHeading)}
-          tx="welcomeScreen:readyForLaunch"
-          preset="heading"
-        />
-        <Text tx="welcomeScreen:exciting" preset="subheading" />
-        <Image
-          style={$welcomeFace}
-          source={welcomeFace}
-          resizeMode="contain"
-          tintColor={theme.isDark ? theme.colors.palette.neutral900 : undefined}
-        />
-      </View>
-
-      <View style={themed([$bottomContainer, $bottomContainerInsets])}>
-        <Text tx="welcomeScreen:postscript" size="md" />
+    <Screen preset="fixed">
+      <View>
+        <TouchableOpacity
+          onPress={handleLogout}
+          style={{ width: "90%", backgroundColor: "blue", padding: 10, alignItems: "center" }}
+        >
+          <Text text="logout" />
+        </TouchableOpacity>
       </View>
     </Screen>
   )
