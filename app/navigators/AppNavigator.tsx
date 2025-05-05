@@ -12,30 +12,13 @@ import Config from "../config"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { useAppTheme, useThemeProvider } from "@/utils/useAppTheme"
 import { ComponentProps } from "react"
+import { useStores } from "@/models"
 
-/**
- * This type allows TypeScript to know what routes are defined in this navigator
- * as well as what properties (if any) they might take when navigating to them.
- *
- * If no params are allowed, pass through `undefined`. Generally speaking, we
- * recommend using your MobX-State-Tree store(s) to keep application state
- * rather than passing state through navigation params.
- *
- * For more information, see this documentation:
- *   https://reactnavigation.org/docs/params/
- *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
- *   https://reactnavigation.org/docs/typescript/#organizing-types
- */
 export type AppStackParamList = {
   Welcome: undefined
-  // 🔥 Your screens go here
-  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+  Login: undefined
 }
 
-/**
- * This is a list of all the route names that will exit the app if the back button
- * is pressed while in that screen. Only affects Android.
- */
 const exitRoutes = Config.exitRoutes
 
 export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<
@@ -54,7 +37,7 @@ const AppStack = observer(function AppStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
         navigationBarColor: colors.background,
         contentStyle: {
           backgroundColor: colors.background,
@@ -62,8 +45,26 @@ const AppStack = observer(function AppStack() {
       }}
     >
       <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
-      {/** 🔥 Your screens go here */}
-      {/* IGNITE_GENERATOR_ANCHOR_APP_STACK_SCREENS */}
+    </Stack.Navigator>
+  )
+})
+
+const LoginStack = observer(function LoginStack() {
+  const {
+    theme: { colors },
+  } = useAppTheme()
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        navigationBarColor: colors.background,
+        contentStyle: {
+          backgroundColor: colors.background,
+        },
+      }}
+    >
+      <Stack.Screen name="Login" component={Screens.LoginScreen} />
     </Stack.Navigator>
   )
 })
@@ -77,10 +78,14 @@ export const AppNavigator = observer(function AppNavigator(props: NavigationProp
 
   useBackButtonHandler((routeName) => exitRoutes.includes(routeName))
 
+  const {
+    authStore: { isAuthenticated },
+  } = useStores()
+
   return (
     <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
       <NavigationContainer ref={navigationRef} theme={navigationTheme} {...props}>
-        <AppStack />
+        {isAuthenticated ? <AppStack /> : <LoginStack />}
       </NavigationContainer>
     </ThemeProvider>
   )
